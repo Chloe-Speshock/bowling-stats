@@ -2,7 +2,6 @@
   "name": "bowling-stats",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",
     "server": "nodemon server/index.js",
@@ -10,7 +9,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "seed": "node ./src/server/seed.js",
+    "create-tables": "node ./src/server/createTables.js"
   },
   "dependencies": {
     "axios": "^1.7.7",
