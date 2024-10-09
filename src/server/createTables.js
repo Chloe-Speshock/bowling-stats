@@ -3,52 +3,51 @@ const pool = require("./db"); // Import the connection pool
 const dropTables = async () => {
   try {
     await pool.query(/*sql*/ `
-        DROP TABLE IF EXISTS games CASCADE;
-        DROP TABLE IF EXISTS players CASCADE;
-        DROP TABLE IF EXISTS teams CASCADE;
-      `);
-    console.log("Tables dropped successfully (if they existed)!");
-  } catch (err) {
-    console.error("Error dropping tables:", err);
+DROP TABLE IF EXISTS games;
+DROP TABLE IF EXISTS players;
+DROP TABLE IF EXISTS teams;
+`);
+    console.log("Tables dropped successfully.");
+  } catch (error) {
+    console.error("error dropping tables:", error);
+    throw error;
   }
 };
 
 const createTables = async () => {
   try {
     await pool.query(/*sql*/ `
-      CREATE TABLE IF NOT EXISTS teams (
+    CREATE TABLE teams (
         team_id SERIAL PRIMARY KEY,
         team_name VARCHAR(100) NOT NULL
-      );
+    );
+      `);
 
-      CREATE TABLE IF NOT EXISTS players (
+    await pool.query(/*sql*/ `
+      CREATE TABLE players (
         player_id SERIAL PRIMARY KEY,
-        team_id INT REFERENCES teams(team_id),
+        team_id INTEGER REFERENCES teams(team_id) ON DELETE CASCADE,
         name VARCHAR(100) NOT NULL,
-        total_games INT DEFAULT 0,
-        total_score INT DEFAULT 0,
-        high_score INT DEFAULT 0,
-        average_score DECIMAL DEFAULT 0.0,
-        handicap DECIMAL DEFAULT 0.0
+        total_games INTEGER DEFAULT 0,
+        total_score INTEGER DEFAULT 0,
+        high_score INTEGER DEFAULT 0,
+        average_score NUMERIC(5,2) DEFAULT 0,
+        handicap NUMERIC(5,2) DEFAULT 0
       );
-
-      CREATE TABLE IF NOT EXISTS games (
+      `);
+    await pool.query(/*sql*/ `
+      CREATE TABLE games (
         game_id SERIAL PRIMARY KEY,
-        player_id INT REFERENCES players(player_id),
+        player_id INTEGER REFERENCES players(player_id) ON DELETE CASCADE,
         score INT NOT NULL,
-        game_date DATE DEFAULT CURRENT_DATE
+        game_date DATE NOT NULL
       );
     `);
 
     console.log("Tables created successfully!");
   } catch (err) {
     console.error("Error creating tables:", err);
-  } finally {
-    try {
-      await pool.end(); // Close the pool connection after executing the queries
-    } catch (closeErr) {
-      console.error("error closing the pool:", closeErr);
-    }
+    throw err;
   }
 };
 
@@ -59,7 +58,12 @@ const initializeDatabase = async () => {
     await createTables();
   } catch (err) {
     console.error("database initialization failed:", err);
+  } finally {
+      await pool.end();
+      console.log("database connection closed");
   }
 };
 
 initializeDatabase();
+
+module.exports = createTables;
