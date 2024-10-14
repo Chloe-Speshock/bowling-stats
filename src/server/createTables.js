@@ -3,9 +3,11 @@ const pool = require("./db"); // Import the connection pool
 const dropTables = async () => {
   try {
     await pool.query(/*sql*/ `
-DROP TABLE IF EXISTS games;
-DROP TABLE IF EXISTS players;
-DROP TABLE IF EXISTS teams;
+DROP TABLE IF EXISTS games CASCADE;
+DROP TABLE IF EXISTS players CASCADE;
+DROP TABLE IF EXISTS teams CASCADE;
+DROP SEQUENCE IF EXISTS teams_team_id_seq CASCADE;
+DROP SEQUENCE IF EXISTS players_player_id_seq CASCADE;
 `);
     console.log("Tables dropped successfully.");
   } catch (error) {
@@ -58,9 +60,6 @@ const initializeDatabase = async () => {
     await createTables();
   } catch (err) {
     console.error("database initialization failed:", err);
-  } finally {
-      await pool.end();
-      console.log("database connection closed");
   }
 };
 

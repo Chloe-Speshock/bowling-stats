@@ -46,40 +46,15 @@ const seedGames = async (players) => {
     for (const week of gamesByWeek) {
       console.log(`seeding games for week: ${week.week}`);
 
-      for (const game of week.games) {
-        if (!game.player_id) {
-          throw new Error(`Player ID is undefined for one of the games!`);
-        }
-      }
-      const existingGamesQuery = `
-      SELECT COUNT(*) FROM games WHERE game_date = '${
-        week.week
-      }' AND player_id IN (${week.games
-        .map((game) => game.player_id)
-        .join(", ")});
+      const gamesQuery = `
+      INSERT INTO games (player_id, score, game_date) VALUES
+      ${week.games
+        .map((game) => `(${game.player_id}, ${game.score}, '${week.week}')`)
+        .join(", ")}
+      RETURNING *;
     `;
-      const existingGamesResult = await pool.query(existingGamesQuery);
-      const existingGamesCount = parseInt(
-        existingGamesResult.rows[0].count,
-        10
-      );
-
-      // Only insert games if none exist for this week
-      if (existingGamesCount === 0) {
-        const gamesQuery = `
-        INSERT INTO games (player_id, score, game_date) VALUES
-        ${week.games
-          .map((game) => `(${game.player_id}, ${game.score}, '${week.week}')`)
-          .join(", ")}
-        RETURNING *;
-      `;
-        const gamesResult = await pool.query(gamesQuery);
-        console.log(`Games for week ${week.week} seeded:`, gamesResult.rows);
-      } else {
-        console.log(
-          `games for week ${week.week} already exist. Skipping insert.`
-        );
-      }
+      const gamesResult = await pool.query(gamesQuery);
+      console.log(`Games for week ${week.week} seeded:`, gamesResult.rows);
     }
   } catch (err) {
     console.error("Error seeding games:", err);
