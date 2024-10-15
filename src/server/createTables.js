@@ -1,8 +1,8 @@
-const pool = require("./db"); // Import the connection pool
+const db = require("./db"); // Import the connection pool
 
 const dropTables = async () => {
   try {
-    await pool.query(/*sql*/ `
+    await db.query(/*sql*/ `
 DROP TABLE IF EXISTS games CASCADE;
 DROP TABLE IF EXISTS players CASCADE;
 DROP TABLE IF EXISTS teams CASCADE;
@@ -18,14 +18,14 @@ DROP SEQUENCE IF EXISTS players_player_id_seq CASCADE;
 
 const createTables = async () => {
   try {
-    await pool.query(/*sql*/ `
+    await db.query(/*sql*/ `
     CREATE TABLE teams (
         team_id SERIAL PRIMARY KEY,
         team_name VARCHAR(100) NOT NULL
     );
       `);
 
-    await pool.query(/*sql*/ `
+    await db.query(/*sql*/ `
       CREATE TABLE players (
         player_id SERIAL PRIMARY KEY,
         team_id INTEGER REFERENCES teams(team_id) ON DELETE CASCADE,
@@ -37,7 +37,7 @@ const createTables = async () => {
         handicap NUMERIC(5,2) DEFAULT 0
       );
       `);
-    await pool.query(/*sql*/ `
+    await db.query(/*sql*/ `
       CREATE TABLE games (
         game_id SERIAL PRIMARY KEY,
         player_id INTEGER REFERENCES players(player_id) ON DELETE CASCADE,

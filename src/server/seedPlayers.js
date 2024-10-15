@@ -1,4 +1,4 @@
-const pool = require("./db"); // Import the connection pool
+const db = require("./db"); // Import the connection pool
 
 const seedPlayers = async () => {
   try {
@@ -7,7 +7,7 @@ const seedPlayers = async () => {
         ('The Bowld and the Beautiful') 
         RETURNING *;
       `;
-    const teamsResult = await pool.query(teamsQuery);
+    const teamsResult = await db.query(teamsQuery);
     console.log("Teams seeded:", teamsResult.rows);
 
     const playersQuery = /*sql*/ `
@@ -18,7 +18,7 @@ const seedPlayers = async () => {
         (${teamsResult.rows[0].team_id}, 'Tray') 
         RETURNING *;
       `;
-    const playersResult = await pool.query(playersQuery);
+    const playersResult = await db.query(playersQuery);
     console.log("Players seeded:", playersResult.rows);
 
     return playersResult.rows; // Return the seeded players to use them in games

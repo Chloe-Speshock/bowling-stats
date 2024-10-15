@@ -1,5 +1,5 @@
 const createTables = require("./createTables");
-const pool = require("./db"); // Import the connection pool
+const db = require("./db"); // Import the connection pool
 const seedGames = require("./seedGames"); // Import the game seeding function
 
 const seedDatabase = async () => {
@@ -11,7 +11,7 @@ const seedDatabase = async () => {
   RETURNING team_id;
   `;
 
-    const teamResult = await pool.query(teamsQuery);
+    const teamResult = await db.query(teamsQuery);
     const teamId = teamResult.rows[0].team_id;
     console.log(`Team created: ${teamId}`);
 
@@ -24,7 +24,7 @@ const seedDatabase = async () => {
       ($1, 'Tray') 
       RETURNING *;
     `;
-    const playersResult = await pool.query(playersQuery, [teamId]);
+    const playersResult = await db.query(playersQuery, [teamId]);
     const players = playersResult.rows;
     console.log("Players seeded:", players);
 
@@ -34,9 +34,6 @@ const seedDatabase = async () => {
     console.log("Database seeded successfully!");
   } catch (err) {
     console.error("Error seeding the database:", err);
-  } finally {
-    await pool.end(); // Close the pool connection after seeding
-    console.log("database connection closed");
   }
 };
 
