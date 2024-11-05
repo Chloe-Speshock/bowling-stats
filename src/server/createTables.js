@@ -8,10 +8,11 @@ DROP TABLE IF EXISTS players CASCADE;
 DROP TABLE IF EXISTS teams CASCADE;
 DROP SEQUENCE IF EXISTS teams_team_id_seq CASCADE;
 DROP SEQUENCE IF EXISTS players_player_id_seq CASCADE;
+DROP SEQUENCE IF EXISTS games_game_id_seq CASCADE;
 `);
-    console.log("Tables dropped successfully.");
+    console.log("Tables and sequences dropped successfully.");
   } catch (error) {
-    console.error("Error dropping tables:", error);
+    console.error("Error dropping tables and sequences:", error);
     throw error;
   }
 };
@@ -21,7 +22,7 @@ const createTables = async () => {
     await db.query(/*sql*/ `
     CREATE TABLE IF NOT EXISTS teams (
         team_id SERIAL PRIMARY KEY,
-        team_name VARCHAR(100) NOT NULL
+        team_name VARCHAR(100) UNIQUE NOT NULL
     );
       `);
 
@@ -29,7 +30,7 @@ const createTables = async () => {
       CREATE TABLE IF NOT EXISTS players (
         player_id SERIAL PRIMARY KEY,
         team_id INTEGER REFERENCES teams(team_id) ON DELETE CASCADE,
-        name VARCHAR(100) NOT NULL,
+        name VARCHAR(100) UNIQUE NOT NULL,
         total_games INTEGER DEFAULT 0,
         total_score INTEGER DEFAULT 0,
         high_score INTEGER DEFAULT 0,
@@ -39,10 +40,11 @@ const createTables = async () => {
       `);
     await db.query(/*sql*/ `
       CREATE TABLE IF NOT EXISTS games (
-        game_id SERIAL PRIMARY KEY,
-        player_id INTEGER REFERENCES players(player_id) ON DELETE CASCADE,
+        player_id INT,
         score INT NOT NULL,
-        game_date DATE NOT NULL
+        game_date DATE NOT NULL,
+        game_number INT,
+        PRIMARY KEY (player_id, game_date, game_number)
       );
     `);
 
@@ -63,7 +65,7 @@ const initializeDatabase = async () => {
   }
 };
 
-initializeDatabase();
+// initializeDatabase();
 
 module.exports = {
   createTables,

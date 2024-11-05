@@ -39,6 +39,22 @@ const updatePlayerStats = async (player_id) => {
   }
 };
 
+const insertGameIfNotExists = async (player_id, score, game_date) => {
+  const checkGameQuery = /*sql*/ `
+    SELECT 1 FROM games WHERE player_id = $1 AND game_date = $2;
+  `;
+  const { rows } = await db.query(checkGameQuery, [player_id, game_date]);
+
+  if (rows.length === 0) {
+    // Only insert if the game does not exist
+    const insertGameQuery = /*sql*/ `
+      INSERT INTO games (player_id, score, game_date)
+      VALUES ($1, $2, $3);
+    `;
+    await db.query(insertGameQuery, [player_id, score, game_date]);
+  }
+};
+
 const seedDatabase = async () => {
   try {
     await initializeDatabase();
@@ -72,132 +88,82 @@ const seedDatabase = async () => {
       {
         week: "2024-09-03",
         games: [
-          { player_id: players[0].player_id, score: 145 },
-          { player_id: players[2].player_id, score: 137 },
-          { player_id: players[3].player_id, score: 123 },
-          { player_id: players[0].player_id, score: 140 },
-          { player_id: players[2].player_id, score: 125 },
-          { player_id: players[3].player_id, score: 114 },
-          { player_id: players[0].player_id, score: 113 },
-          { player_id: players[2].player_id, score: 159 },
-          { player_id: players[3].player_id, score: 157 },
+          { player_id: players[0].player_id, scores: [145, 140, 113] },
+          { player_id: players[2].player_id, scores: [137, 125, 159] },
+          { player_id: players[3].player_id, scores: [123, 114, 157] },
         ],
       },
       {
         week: "2024-09-10",
         games: [
-          { player_id: players[0].player_id, score: 160 },
-          { player_id: players[2].player_id, score: 149 },
-          { player_id: players[3].player_id, score: 135 },
-          { player_id: players[0].player_id, score: 182 },
-          { player_id: players[2].player_id, score: 153 },
-          { player_id: players[3].player_id, score: 104 },
-          { player_id: players[0].player_id, score: 150 },
-          { player_id: players[2].player_id, score: 140 },
-          { player_id: players[3].player_id, score: 130 },
+          { player_id: players[0].player_id, scores: [160, 182, 150] },
+          { player_id: players[2].player_id, scores: [149, 153, 140] },
+          { player_id: players[3].player_id, scores: [135, 104, 130] },
         ],
       },
       {
         week: "2024-09-17",
         games: [
-          { player_id: players[0].player_id, score: 113 },
-          { player_id: players[1].player_id, score: 116 },
-          { player_id: players[2].player_id, score: 155 },
-          { player_id: players[3].player_id, score: 173 },
-          { player_id: players[0].player_id, score: 176 },
-          { player_id: players[1].player_id, score: 100 },
-          { player_id: players[2].player_id, score: 150 },
-          { player_id: players[3].player_id, score: 211 },
-          { player_id: players[0].player_id, score: 128 },
-          { player_id: players[1].player_id, score: 139 },
-          { player_id: players[2].player_id, score: 147 },
-          { player_id: players[3].player_id, score: 209 },
+          { player_id: players[0].player_id, scores: [113, 176, 128] },
+          { player_id: players[1].player_id, scores: [116, 100, 139] },
+          { player_id: players[2].player_id, scores: [155, 150, 147] },
+          { player_id: players[3].player_id, scores: [173, 211, 209] },
         ],
       },
       {
         week: "2024-09-24",
         games: [
-          { player_id: players[0].player_id, score: 137 },
-          { player_id: players[1].player_id, score: 130 },
-          { player_id: players[2].player_id, score: 164 },
-          { player_id: players[3].player_id, score: 171 },
-          { player_id: players[0].player_id, score: 110 },
-          { player_id: players[1].player_id, score: 133 },
-          { player_id: players[2].player_id, score: 138 },
-          { player_id: players[3].player_id, score: 172 },
-          { player_id: players[0].player_id, score: 117 },
-          { player_id: players[1].player_id, score: 147 },
-          { player_id: players[2].player_id, score: 153 },
-          { player_id: players[3].player_id, score: 139 },
+          { player_id: players[0].player_id, scores: [137, 110, 117] },
+          { player_id: players[1].player_id, scores: [130, 133, 147] },
+          { player_id: players[2].player_id, scores: [164, 138, 153] },
+          { player_id: players[3].player_id, scores: [171, 172, 139] },
         ],
       },
       {
         week: "2024-10-01",
         games: [
-          { player_id: players[0].player_id, score: 122 },
-          { player_id: players[1].player_id, score: 109 },
-          { player_id: players[2].player_id, score: 147 },
-          { player_id: players[3].player_id, score: 160 },
-          { player_id: players[0].player_id, score: 129 },
-          { player_id: players[1].player_id, score: 163 },
-          { player_id: players[2].player_id, score: 186 },
-          { player_id: players[3].player_id, score: 166 },
-          { player_id: players[0].player_id, score: 154 },
-          { player_id: players[1].player_id, score: 151 },
-          { player_id: players[2].player_id, score: 135 },
-          { player_id: players[3].player_id, score: 158 },
+          { player_id: players[0].player_id, scores: [122, 129, 154] },
+          { player_id: players[1].player_id, scores: [109, 163, 151] },
+          { player_id: players[2].player_id, scores: [147, 186, 135] },
+          { player_id: players[3].player_id, scores: [160, 166, 158] },
         ],
       },
       {
         week: "2024-10-08",
         games: [
-          { player_id: players[1].player_id, score: 128 },
-          { player_id: players[2].player_id, score: 131 },
-          { player_id: players[3].player_id, score: 141 },
-
-          { player_id: players[1].player_id, score: 138 },
-          { player_id: players[2].player_id, score: 109 },
-          { player_id: players[3].player_id, score: 133 },
-
-          { player_id: players[1].player_id, score: 125 },
-          { player_id: players[2].player_id, score: 105 },
-          { player_id: players[3].player_id, score: 139 },
+          { player_id: players[1].player_id, scores: [128, 138, 125] },
+          { player_id: players[2].player_id, scores: [131, 109, 105] },
+          { player_id: players[3].player_id, scores: [141, 133, 139] },
         ],
       },
 
       {
         week: "2024-10-15",
         games: [
-          { player_id: players[0].player_id, score: 159 },
-          { player_id: players[1].player_id, score: 113 },
-          { player_id: players[2].player_id, score: 120 },
-          { player_id: players[3].player_id, score: 161 },
-          { player_id: players[0].player_id, score: 128 },
-          { player_id: players[1].player_id, score: 145 },
-          { player_id: players[2].player_id, score: 139 },
-          { player_id: players[3].player_id, score: 148 },
-          { player_id: players[0].player_id, score: 130 },
-          { player_id: players[1].player_id, score: 122 },
-          { player_id: players[2].player_id, score: 144 },
-          { player_id: players[3].player_id, score: 137 },
+          { player_id: players[0].player_id, scores: [159, 128, 130] },
+          { player_id: players[1].player_id, scores: [113, 145, 122] },
+          { player_id: players[2].player_id, scores: [120, 139, 144] },
+          { player_id: players[3].player_id, scores: [161, 148, 137] },
         ],
       },
 
       {
         week: "2024-10-22",
         games: [
-          { player_id: players[0].player_id, score: 129 },
-          { player_id: players[1].player_id, score: 108 },
-          { player_id: players[2].player_id, score: 138 },
-          { player_id: players[3].player_id, score: 189 },
-          { player_id: players[0].player_id, score: 121 },
-          { player_id: players[1].player_id, score: 136 },
-          { player_id: players[2].player_id, score: 120 },
-          { player_id: players[3].player_id, score: 163 },
-          { player_id: players[0].player_id, score: 136 },
-          { player_id: players[1].player_id, score: 124 },
-          { player_id: players[2].player_id, score: 159 },
-          { player_id: players[3].player_id, score: 169 },
+          { player_id: players[0].player_id, scores: [129, 121, 136] },
+          { player_id: players[1].player_id, scores: [108, 136, 124] },
+          { player_id: players[2].player_id, scores: [138, 120, 159] },
+          { player_id: players[3].player_id, scores: [189, 163, 169] },
+        ],
+      },
+
+      {
+        week: "2024-10-29",
+        games: [
+          { player_id: players[0].player_id, scores: [113, 160, 113] },
+          { player_id: players[1].player_id, scores: [166, 111, 100] },
+          { player_id: players[2].player_id, scores: [180, 125, 145] },
+          { player_id: players[3].player_id, scores: [169, 156, 163] },
         ],
       },
       // add more weeks here following the same structure
@@ -205,16 +171,19 @@ const seedDatabase = async () => {
 
     for (const week of gamesByWeek) {
       for (const game of week.games) {
-        const insertGameQuery = /*sql*/ `
-          INSERT INTO games (player_id, score, week)
-          VALUES ($1, $2, $3)
-       
+        for (let i = 0; i < game.scores.length; i++) {
+          const insertGameQuery = /*sql*/ `
+          INSERT INTO games (player_id, score, game_date, game_number)
+          VALUES ($1, $2, $3, $4)
+          ON CONFLICT (player_id, game_date, game_number) DO NOTHING; 
           `;
-        await db.query(insertGameQuery, [
-          game.player_id,
-          game.score,
-          week.week,
-        ]);
+          await db.query(insertGameQuery, [
+            game.player_id,
+            game.scores[i],
+            week.week,
+            i + 1,
+          ]);
+        }
       }
     }
 
